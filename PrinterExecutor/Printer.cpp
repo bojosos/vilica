@@ -10,6 +10,7 @@ struct Printer : TaskSystem::Executor {
     Printer(std::unique_ptr<TaskSystem::Task> taskToExecute) : Executor(std::move(taskToExecute)) {
         max = task->GetIntParam("max").value();
         sleepMs = task->GetIntParam("sleep").value();
+        name = task->GetStringParam("name").value();
     }
 
     virtual ~Printer() {}
@@ -21,7 +22,7 @@ struct Printer : TaskSystem::Executor {
             return ExecStatus::ES_Stop;
         }
 
-        printf("Printer [%d/%d]: %d\n", threadIndex, threadCount, myValue);
+        printf("Printer %s [%d/%d]: %d\n", name.c_str(), threadIndex+1, threadCount, myValue);
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
         return ExecStatus::ES_Continue;
     };
@@ -29,6 +30,7 @@ struct Printer : TaskSystem::Executor {
     std::atomic<int> current = 0;
     int max = 0;
     int sleepMs = 0;
+    std::string name;
 };
 
 TaskSystem::Executor* ExecutorConstructorImpl(std::unique_ptr<TaskSystem::Task> taskToExecute) {
